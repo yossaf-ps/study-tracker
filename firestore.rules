@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // المهام: أي حد معاه اللينك يقرأ ويضيف ويمسح
+    match /tasks/{taskId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['title', 'subject', 'kind', 'priority', 'due', 'by', 'at'])
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0
+                    && request.resource.data.title.size() <= 120;
+      allow delete: if true;
+      allow update: if false;
+    }
+
+    // تقدم كل واحد: مستند واحد لكل جهاز
+    match /progress/{personId} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['done', 'name', 'updatedAt'])
+                   && request.resource.data.name is string
+                   && request.resource.data.name.size() <= 40;
+      allow delete: if false;
+    }
+  }
+}
